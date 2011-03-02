@@ -3,18 +3,30 @@ require 'appscript'
 require 'pathname'
 
 class XcodeProxy
-  def initialize (project)
+  def initialize (path)
+    @project = nil
+    full_path = Pathname.new(path).realpath.to_s
+    mac_path = full_path
+    mac_path.sub!(/^\//, '')
+    mac_path.gsub!(/\//, ':')
     @app = Appscript.app('Xcode')
-    @app.open(project)
+    @app.open(mac_path)
+    prjs = @app.projects.get
+    prjs.each do |pr|
+      tmp_path = pr.path.get
+      if path == tmp_path then
+        @project = pr.name.get
+      end
+    end
   end
 
   def list(verbose = false)
-    root_group = @app.projects[1].root_group
+    root_group = @app.projects[@project].root_group
     list_group(root_group, verbose)
   end
 
   def add(path, group)
-    root_group = @app.projects[1].root_group
+    root_group = @app.projects[@project].root_group
     group_ref = find_group(root_group, group)
     if group_ref != nil then
       file = File.basename(path)
@@ -29,7 +41,7 @@ class XcodeProxy
         compilable = %w[.cpp .c .C .m .mm]
         compilable.each do |ext|
           if path =~ /#{ext}$/ then
-            file_ref.add(:to => @app.projects[1].targets[1])
+            file_ref.add(:to => @app.projects[@project].targets[1])
             break
           end
         end
@@ -40,7 +52,7 @@ class XcodeProxy
   def remove(path)
     filename = File.basename(path)
     group = File.dirname(path)
-    root_group = @app.projects[1].root_group
+    root_group = @app.projects[@project].root_group
     group_ref = find_group(root_group, group)
     return if group_ref == nil
 
@@ -55,14 +67,14 @@ class XcodeProxy
   end
 
   def mkgroup(group)
-    @app.projects[1].root_group.make(
+    @app.projects[@project].root_group.make(
       :new => :group, 
       :with_properties => {:name => group}
     )
   end
 
   def rmgroup(group)
-    root_group = @app.projects[1].root_group
+    root_group = @app.projects[@project].root_group
     group_ref = find_group(root_group, group)
     if group_ref == nil then
       puts "Group #{group} not found"
@@ -127,30 +139,69 @@ private
 end
 
 class Xcs < Thor
-  @@proxy = XcodeProxy.new('Users:gonzo:Projects:FTool:FTool.xcodeproj')
+
+  def initialize(*args)
+    super
+    @proxy = nil
+  end
+
   method_options :verbose => :boolean
   desc 'list [--verbose]',  'List project contents'
+
   def list
-    @@proxy.list(options.verbose?)
+    open_project
+    @proxy.list(options.verbose?)
   end
 
   desc 'add File [Group]',  'Add file to a group. By default adds to "Source"'
   def add(path, group)
-    @@proxy.add(File.absolute_path(path), group)
+    open_project
+    @proxy.add(File.absolute_path(path), group)
   end
 
   desc 'rm Group/File',  'Remove file reference from a project'
   def rm(path)
-    @@proxy.remove(path)
+    open_project
+    @proxy.remove(path)
   end
 
   desc 'mkgroup Group',  'Create new subgroup in root group'
   def mkgroup(group)
-    @@proxy.mkgroup(group)
+    open_project
+    @proxy.mkgroup(group)
   end
 
   desc 'rmgroup Group',  'Remove Group'
   def rmgroup(group)
-    @@proxy.rmgroup(group)
+    open_project
+    @proxy.rmgroup(group)
   end
+
+  no_tasks { 
+    def open_project
+      # try to find .xcodeproj file
+      cwd = Pathname.new(Dir.pwd)
+      project_path = nil
+      while true do
+        projects = Dir.entries(cwd).grep /.xcodeproj$/
+        if projects.count > 1 then
+          puts "Confused: more then one .xcodeproj file found"
+          exit(1)
+        end
+        if projects.count == 1 then
+          proj_path = (cwd + projects[0]).realpath.to_s
+          puts "Using #{proj_path}"
+
+          break
+        end
+        break if cwd == cwd.parent
+        cwd = cwd.parent
+      end
+      if proj_path == nil then
+        puts "No .xcodeproj file found, giving up"
+        exit(1)
+      end
+      @proxy = XcodeProxy.new(proj_path)
+    end
+  }
 end
