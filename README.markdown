@@ -8,7 +8,7 @@ While building/cleaning Xcode project from command line is trivial task (hint: x
 
 You'll need two gems: [thor](https://github.com/wycats/thor) and [rb-appscript](http://appscript.sourceforge.net/rb-appscript/index.html). And then run 
 
-	thor install http://github.com/gonzoua/xcs/raw/master/xcs.thor
+	thor install https://github.com/gonzoua/xcs/raw/master/xcs.thor
 
 ### Tasks
 
