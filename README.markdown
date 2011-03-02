@@ -10,27 +10,6 @@ You'll need two gems: [thor](https://github.com/wycats/thor) and [rb-appscript](
 
 	thor install http://github.com/gonzoua/xcs/raw/master/xcs.thor
 
-### Usage
-
-Just cd to your project directory and run
-
-    thor xcs:list
-
-You'll get something like this:
-
-
-## xcs (Xcode script) 
-
-### Intro
-
-While building/cleaning Xcode project from command line is trivial task (hint: xcodebuild), managing the project content used to be the hard one. Not any more. xcs provides set of Thor tasks for adding/removing groups/files from xcode project
-
-### Installation
-
-You'll need two gems: [thor](https://github.com/wycats/thor) and [rb-appscript](http://appscript.sourceforge.net/rb-appscript/index.html). And then run 
-
-	thor install http://github.com/gonzoua/xcs/raw/master/xcs.thor
-
 ### Tasks
 
 Get full list of tasks using command
@@ -91,4 +70,3 @@ Pull requests are even more welcome.
 ### License
 
 See LICENSE
-
