@@ -81,4 +81,14 @@ Create a file and add it to project, to group FooSources
 
 ### Ideas
 
-Ideas are welcome. Open issue or drop me a line at gonzo@bluezbox.com Though pull requests are even more welcome.
+Ideas are welcome. Open issue or drop me a line at gonzo@bluezbox.com  
+Pull requests are even more welcome.
+
+### Contributors
+
+[Oleksandr Tymoshenko](http://bluezbox.com)
+
+### License
+
+See LICENSE
+
