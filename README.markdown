@@ -2,7 +2,7 @@
 
 ### Intro
 
-While building/cleaning Xcode project from command line is trivial task (hint: xcodebuild), managing the project content used to be the hard one. Not any more. xcs provides set of Thor tasks for adding/removing groups/files from xcode project
+While building/cleaning Xcode project from command line is trivial task (hint: xcodebuild), managing the project content used to be the hard one. **xcs** is supposed to solve this problem: it provides a minimal set of tasks for adding/removing files for existing Xcode projects. 
 
 ### Installation
 
