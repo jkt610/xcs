@@ -5,6 +5,7 @@ require 'pathname'
 class XcodeProxy
   def initialize (path)
     @project = nil
+    @project_document = File.basename(path)
     full_path = Pathname.new(path).realpath.to_s
     mac_path = full_path
     mac_path.sub!(/^\//, '')
@@ -18,6 +19,10 @@ class XcodeProxy
         @project = pr.name.get
       end
     end
+  end
+
+  def close
+    @app.project_documents[@project_document].close
   end
 
   def list(verbose = false)
@@ -157,24 +162,28 @@ class Xcs < Thor
   def add(path, group)
     open_project
     @proxy.add(File.absolute_path(path), group)
+    @proxy.close 
   end
 
   desc 'rm Group/File',  'Remove file reference from a project'
   def rm(path)
     open_project
     @proxy.remove(path)
+    @proxy.close 
   end
 
   desc 'mkgroup Group',  'Create new subgroup in root group'
   def mkgroup(group)
     open_project
     @proxy.mkgroup(group)
+    @proxy.close 
   end
 
   desc 'rmgroup Group',  'Remove Group'
   def rmgroup(group)
     open_project
     @proxy.rmgroup(group)
+    @proxy.close 
   end
 
   no_tasks { 
